@@ -1,308 +1,760 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  PieChart, Pie, Cell, Legend 
-} from 'recharts';
-import { DollarSign, FileText, TrendingUp, Award, Search, CalendarDays } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório Financeiro Executivo</title>
 
-// Dados brutos atualizados (Semana de 26.05.2026 a 01.06.2026)
-const rawData = [
-  { id: 1, date: "2026-05-26", requester: "COMPRAS", supplier: "FORESTAMP FARDAMENTOS LTDA", description: "AQUISIÇÃO DE 80 CAMISAS PERSONALIZADAS - EVERESTE 10 ANOS - NF-e 175 / DP (174.2026)", amount: 1920.00, paid: "SIM", method: "PIX" },
-  { id: 2, date: "2026-05-26", requester: "COMPRAS", supplier: "FORESTAMP FARDAMENTOS LTDA", description: "AQUISIÇÃO DE PERSONALIZAÇÃO DA ARTE NA IMPRESSÃO DAS CAMISAS - EVERESTE 10 ANOS / NF-e 180 - DP (174.2026)", amount: 288.00, paid: "SIM", method: "PIX" },
-  { id: 3, date: "2026-05-26", requester: "COMPRAS", supplier: "ABRAÃO RAMON REBOUÇAS RODRIGUES", description: "LOCAÇÃO DE EQUIPAMENTOS ARTISTA DACOTA - EVERESTE 10 ANOS / RECIBO - DP (174.2026)", amount: 500.00, paid: "SIM", method: "PIX" },
-  { id: 4, date: "2026-05-26", requester: "COMPRAS", supplier: "ROSIVALDO SILVA DOS SANTOS", description: "SERVIÇO DE DESMONTA E MONTAGEM PAREDE DE VIDRO, LOCALIZADO NO AUDITÓRIO - EVERESTE 10 ANOS  / NFS-e 39 - DP (174.2026)", amount: 300.00, paid: "SIM", method: "PIX" },
-  { id: 5, date: "2026-05-26", requester: "COMPRAS", supplier: "ROSIVALDO SILVA DOS SANTOS", description: "SERVIÇO DE CODIFICAÇÃO DE 05(CINCO) CONTROLES P/PORTÃO GARAGEM / NFS-e 40 - DP (373.2025)", amount: 375.00, paid: "SIM", method: "PIX" },
-  { id: 6, date: "2026-05-26", requester: "COMPRAS", supplier: "MARE DISTRIBUIDORA DE BEBIDAS", description: "AQUISIÇÃO DE ÁGUA / NF-e 1355396 - DP (183.2024)", amount: 433.80, paid: "SIM", method: "PIX" },
-  { id: 7, date: "2026-05-26", requester: "CONTRATOS", supplier: "CARTÓRIO RTD MANAUS", description: "ALTERAÇÃO DO ESTATUTO DO CONSELHO TÉCNICO CIENTÍFICO - DP (162.2025)", amount: 447.51, paid: "SIM", method: "BOLETO" },
-  { id: 8, date: "2026-05-26", requester: "COMPRAS", supplier: "ECT EMP BRAS DE CORREIOS E TELEGRAFOS", description: "SERVIÇO DE SEDEX - ENVIO DOS CONVITES PARA COLABORADORES FORA DA SEDE  - XXXXXX - EVERESTE 10 ANOS / DP (448.2024)", amount: 492.10, paid: "SIM", method: "PIX" },
-  { id: 9, date: "2026-05-26", requester: "COMPRAS", supplier: "DAYSE DINELLY DE SOUSA", description: "AQUISIÇÃO DE 80 BISCOITOS PERSONALIZADOS - EVERESTE 10 ANOS / RECIBO - DP (174/2026)", amount: 280.00, paid: "SIM", method: "PIX" },
-  { id: 10, date: "2026-05-26", requester: "COMPRAS", supplier: "DAYSE DINELLY DE SOUSA", description: "AQUISIÇÃO DE 70 BISCOITOS PERSONALIZADOS DESTINADOS AOS VISITANTES / RECIBO - DP (197.2024)", amount: 245.00, paid: "SIM", method: "PIX" },
-  { id: 11, date: "2026-05-27", requester: "CGA", supplier: "GTEC SOLUCOES EM TECNOLOGIA LTDA", description: "SERVIÇO DE MONTAGEM E INFRAESTRUTURA DE REDE E SUBSTITUIÇÃO COM INSTALAÇÃO DE CAMERAS DE SEGURANÇA 03.2026 / NFS-e:57 - DP (343.2025)", amount: 16040.00, paid: "SIM", method: "PIX" },
-  { id: 12, date: "2026-05-27", requester: "CONTRATOS", supplier: "GURUMATCH", description: "PLATAFORMA DE EDUCAÇÃO A DISTANCIA (EAD), IMPLANTAÇÃO EXPANSÃO EVERESTE ACADEMY / NFS-e XXXX - DP (461.2025)", amount: 947.00, paid: "SIM", method: "BOLETO" },
-  { id: 13, date: "2026-05-27", requester: "COMPRAS", supplier: "MABELLY FESTAS E DECORAÇÕES", description: "SERVIÇO DE DECORAÇÃO BACKDROP COM BALÕES - EVERESTE 10 ANOS  / NFS-e 21 - DP (174.2026)", amount: 1050.00, paid: "SIM", method: "PIX" },
-  { id: 14, date: "2026-05-27", requester: "COMPRAS", supplier: "BUFFET FINGER FOOD DICARLLO MANAUS", description: "AQUISIÇÃO DE BUFFET P/ 70 PESSOAS- EVERESTE 10 ANOS(AGUARDANDO AUTORIZAÇÃO DO ORDENADOR DE DESPESAS)", amount: 2500.00, paid: "SIM", method: "PIX" },
-  { id: 15, date: "2026-05-27", requester: "CONTRATOS", supplier: "CARLOS ALBERTO DE SALES SOCIEDADE INDIVIDUAL DE ADVOCACIA", description: "CONTRATO DE CONSULTORIA E ASSESSORIA JURIDICA DE 16.02.2026 a 16.03.2026 / NFS-e XX - DP (236.2025)", amount: 29468.34, paid: "SIM", method: "PIX" },
-  { id: 16, date: "2026-05-27", requester: "COMPRAS", supplier: "FRANCE ANDERSON DA SILVA SANTOS", description: "SERVIÇO DE ENTREGA DE CONVITES PARA CONSELHEIROS - EVERESTE 10 ANOS/ RECIBO - DP 174/2026", amount: 140.00, paid: "SIM", method: "PIX" },
-  { id: 17, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO 05.2026 / NFS-e XXXX - DP (38.2024)", amount: 45135.00, paid: "SIM", method: "BOLETO" },
-  { id: 18, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO 05.2026 / NFS-e XXXX - DP (38.2024)", amount: 2507.50, paid: "SIM", method: "BOLETO" },
-  { id: 19, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO 05.2026 / NFS-e XXXXX - DP (38.2024)", amount: 29087.00, paid: "SIM", method: "BOLETO" },
-  { id: 20, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO BOLSA 05.2026 / NFS-e XXXX - DP (38.2024)", amount: 1654.95, paid: "SIM", method: "BOLETO" },
-  { id: 21, date: "2026-05-28", requester: "CGA", supplier: "AOVS SISTEMAS DE INFORMATICA S.A.", description: "MATERIAL DIDÁTICO ONLINE DA ALURA APOSTILAS / NF-e 805.423 - DP (35.2025)", amount: 918.00, paid: "SIM", method: "BOLETO" },
-  { id: 22, date: "2026-05-28", requester: "CGA", supplier: "AOVS SISTEMAS DE INFORMATICA S.A.", description: "ACESSO A PLATAFORMA ALURA - CURSO DE TECNOLOGIA E PROGRAMAÇÃO / NFS-e 954.291 - DP (35.2025)", amount: 102.00, paid: "SIM", method: "BOLETO" },
-  { id: 23, date: "2026-05-28", requester: "COMPRAS", supplier: "GREAT PLACE TO WORK", description: "AQUISIÇÃO CERTIFICAÇÃO GPTW / NFS-e 140.693 - DP (54.2026)", amount: 1648.00, paid: "SIM", method: "BOLETO" },
-  { id: 24, date: "2026-05-28", requester: "COMPRAS", supplier: "BANDA RAHVOX", description: "SERVIÇO DE APRESENTAÇÃO MUSICAL BANDA RAHVOX - EVERESTE 10 ANOS / NFSe 9 - DP(174/2026)", amount: 2100.00, paid: "SIM", method: "PIX" },
-  { id: 25, date: "2026-05-28", requester: "COMPRAS", supplier: "Lima de Jesus Serviços e Comércio de Alimentos Ltda.", description: "ALUGUEL DE MESAS E CADEIRAS DESTINADOS AO EVENTO EVERESTE 10 ANOS/ NFSe 66-70000- DP(174/2026)", amount: 545.00, paid: "SIM", method: "PIX" },
-  { id: 26, date: "2026-05-28", requester: "FOPAG", supplier: "NATHALIA INGRID BENTES LEONEL", description: "30 DIAS DE FÉRIAS - PERÍODO AQUISITIVO 12.06.2025 a 11.06.2026 - DP (XXX)", amount: 7011.18, paid: "SIM", method: "PIX" },
-  { id: 27, date: "2026-05-28", requester: "CGA", supplier: "MARLLON GABREL RIBEIRO DA COSTA", description: "DV 0XX.2026 - 1 e 1/2 DIÁRIAS DE VIAGEM - MANAUS x BARREIRINHA x MAUÉS - XXXXX.2026 - DP (161.2026)", amount: 763.59, paid: "SIM", method: "PIX" },
-  { id: 28, date: "2026-05-28", requester: "CGA", supplier: "ANDRE FABIANO SANTOS PEREIRA", description: "DV 0XX.2026 - 1 e 1/2 DIÁRIAS DE VIAGEM - MANAUS x BARREIRINHA x MAUÉS - REPRESENTAÇÃO INSTITUCIONAL  - DP (235.2023)", amount: 1140.60, paid: "SIM", method: "PIX" },
-  { id: 29, date: "2026-05-28", requester: "COMPRAS", supplier: "ROSIVALDO SILVA DOS SANTOS", description: "SERVIÇO DE DESMONTA E MONTAGEM PAREDE DE VIDRO, LOCALIZADO NO AUDITÓRIO - EVERESTE 10 ANOS / NFS-e XXX - DP (174.2026)", amount: 300.00, paid: "SIM", method: "PIX" },
-  { id: 30, date: "2026-05-28", requester: "COMPRAS", supplier: "BUFFET FINGER FOOD DICARLLO MANAUS", description: "AQUISIÇÃO DE BUFFET P/ 20 PESSOAS - EVERESTE 10 ANOS - NFe XXXX / DP (174/2026)", amount: 1428.00, paid: "SIM", method: "PIX" },
-  { id: 31, date: "2026-05-28", requester: "COMPRAS", supplier: "LIMA JESUS SERVIÇOS E COMÉRCIO DE ALIMENTOS LTDA", description: "ALUGUEL DE 15 CADEIRAS DESTINADAS AO EVENTO EVERESTE 10 ANOS/ NFS-e 74- DP(174/2026)", amount: 105.00, paid: "SIM", method: "PIX" },
-  { id: 32, date: "2026-05-29", requester: "CONTRATOS", supplier: "P2P SOFTWARE CORPORATIVO", description: "21.12 a 20.01.2026 - MANUTENÇÃO DO SOTWARE PLATAFORMA HYPER CHANNEL / NFS-e 15 - DP (38.2025)", amount: 59515.00, paid: "SIM", method: "PIX" },
-  { id: 33, date: "2026-05-29", requester: "CONTRATOS", supplier: "P2P SOFTWARE CORPORATIVO", description: "17.04 a 16.05.2026 - MANUTENÇÃO DO SOTWARE PLATAFORMA HYPER CHANNEL / NFS-e: 16 - DP (39.2025)", amount: 36200.00, paid: "SIM", method: "BOLETO" },
-  { id: 34, date: "2026-05-29", requester: "CONTRATOS", supplier: "REGINALDO ESTEVES GOMES (BOM COMUNICAR)", description: "CONSULTORIA EM SERVIÇOS DE INFORMÁTICA 05.2026 / NFS-e 39- DP (292.2024)", amount: 2300.00, paid: "SIM", method: "BOLETO" },
-  { id: 35, date: "2026-05-29", requester: "CONTRATOS", supplier: "P2P SOFTWARE CORPORATIVO", description: "05.2026 - MANUTENÇÃO DE INFRA ESTRUTURA EM NUVEM E COMUNICAÇÃO / NFS-e: 17 - DP (XX)", amount: 17118.00, paid: "SIM", method: "BOLETO" },
-  { id: 36, date: "2026-05-29", requester: "CONTRATOS", supplier: "CARLOS ALBERTO DE SALES SOCIEDADE INDIVIDUAL DE ADVOCACIA", description: "CONTRATO DE CONSULTORIA E ASSESSORIA JURIDICA DE 16.01.2026 a 16.02.2026/ NFS-e XX - DP (236.2025)", amount: 91468.34, paid: "SIM", method: "PIX" },
-  { id: 37, date: "2026-05-29", requester: "CGA", supplier: "PREFEITURA DE SÃO JOSÉ DOS CAMPOS", description: "TAXA DE LICENÇA DE FISCALIZAÇÃO DE FUNCIONAMENTO (PSJC) - FILIAL PIT - SP -  DP (228.2026)", amount: 167.73, paid: "SIM", method: "BOLETO" },
-  { id: 38, date: "2026-05-30", requester: "CGA", supplier: "RECEITA FEDERAL", description: "PARCELAMENTO PGFN INSS 28/60", amount: 39378.44, paid: "SIM", method: "BOLETO" },
-  { id: 39, date: "2026-05-30", requester: "CONTRATOS", supplier: "KF SOLUCOES EM GESTAO LTDA", description: "ALUGUEL PRÉDIO - 06.2026 - DP (26.2024)", amount: 88000.00, paid: "SIM", method: "PIX" },
-  { id: 40, date: "2026-05-30", requester: "CONTRATOS", supplier: "LUCIANA DA SILVA PINHEIRO", description: "HONORÁRIOS CONTÁBEIS 05.2026 / NFS-e: 25 - DP (40.2025)", amount: 4300.00, paid: "SIM", method: "BOLETO" },
-  { id: 41, date: "2026-05-30", requester: "CONTRATOS", supplier: "LUCIANA DA SILVA PINHEIRO", description: "LICENÇA DE USO DE MÓDULO DE FOLHA DE PAGAMENTO - 19.04 a 09.05.2026 - FATURA/RECIBO N° 05.2026", amount: 220.00, paid: "SIM", method: "PIX" },
-  { id: 42, date: "2026-05-30", requester: "CONTRATOS", supplier: "CHAVES SERVICOS", description: "REPRESENTAÇÃO COMERCIAL - 05/2026 / NFS-e XX - DP (87.2025)", amount: 3000.00, paid: "SIM", method: "PIX" },
-  { id: 43, date: "2026-05-30", requester: "CGA", supplier: "BANCO SANTANDER", description: "ANUIDADE DO CARTÃO DE CREDITO - SANTANDER", amount: 18.50, paid: "SIM", method: "BOLETO" },
-  { id: 44, date: "2026-05-30", requester: "FOPAG", supplier: "ENZO PASSOS CRUZ", description: "BOLSA ESTÁGIO IEL - 05.2026 - DP (425.2025)", amount: 1080.00, paid: "SIM", method: "CARTEIRA DIGITAL" },
-  { id: 45, date: "2026-05-30", requester: "FOPAG", supplier: "ENZO PASSOS CRUZ", description: "BENEFÍCIO DE V.T. - (PERÍODO DE 01 a 30.04.2026) ESTÁGIO - DP (424.2025)", amount: 290.40, paid: "SIM", method: "CARTEIRA DIGITAL" },
-  { id: 46, date: "2026-05-30", requester: "FOPAG", supplier: "THOMAZ MARCOS MAIA DOS SANTOS", description: "BOLSA ESTÁGIO IEL - 05.2026 - DP (425.2025)", amount: 1080.00, paid: "SIM", method: "CARTEIRA DIGITAL" },
-  { id: 47, date: "2026-05-30", requester: "FOPAG", supplier: "THOMAZ MARCOS MAIA DOS SANTOS", description: "BENEFÍCIO DE V.T. - (PERÍODO DE 01 a 30.04.2026) ESTÁGIO - DP (424.2025)", amount: 290.40, paid: "SIM", method: "CARTEIRA DIGITAL" },
-  { id: 48, date: "2026-05-30", requester: "FOPAG", supplier: "SALÁRIO", description: "MAIO.2026", amount: 398639.22, paid: "SIM", method: "CARTEIRA DIGITAL" }
-];
-
-const COLORS = ["#2F80ED", "#56CCF2", "#1B365D", "#4DA3FF", "#A9D0FF"];
-
-// Funções Utilitárias de Formatação
-const formatCurrency = (value) => {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-};
-
-const formatDateBr = (dateStr) => {
-  const [year, month, day] = dateStr.split('-');
-  return `${day}/${month}/${year}`;
-};
-
-// Mapeamento de cores para as tags de forma de pagamento
-const methodColors = {
-  "PIX": "bg-purple-100 text-purple-800",
-  "BOLETO": "bg-orange-100 text-orange-800",
-  "DARF": "bg-rose-100 text-rose-800",
-  "GFD": "bg-teal-100 text-teal-800",
-  "CARTEIRA DIGITAL": "bg-indigo-100 text-indigo-800"
-};
-
-export default function App() {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Processamento de Dados (Memoizado para performance)
-  const { metrics, dailyData, methodData, requesterData } = useMemo(() => {
-    let totalAmount = 0;
-    const dailyMap = {};
-    const methodMap = {};
-    const requesterMap = {};
-
-    rawData.forEach(d => {
-      // Totais
-      totalAmount += d.amount;
-      
-      // Agrupamento Diário
-      dailyMap[d.date] = (dailyMap[d.date] || 0) + d.amount;
-      
-      // Agrupamento por Método
-      methodMap[d.method] = (methodMap[d.method] || 0) + d.amount;
-      
-      // Agrupamento por Solicitante
-      requesterMap[d.requester] = (requesterMap[d.requester] || 0) + d.amount;
-    });
-
-    return {
-      metrics: {
-        total: totalAmount,
-        count: rawData.length,
-        avgTicket: totalAmount / rawData.length,
-        maxPayment: Math.max(...rawData.map(d => d.amount))
-      },
-      dailyData: Object.keys(dailyMap).sort().map(k => ({ name: formatDateBr(k), value: dailyMap[k] })),
-      methodData: Object.keys(methodMap).map(k => ({ name: k, value: methodMap[k] })).sort((a,b) => b.value - a.value),
-      requesterData: Object.keys(requesterMap).map(k => ({ name: k, value: requesterMap[k] })).sort((a,b) => b.value - a.value),
-    };
-  }, []);
-
-  // Filtro da Tabela
-  const filteredTable = useMemo(() => {
-    return rawData.filter(item => 
-      item.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.requester.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.method.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [searchTerm]);
-
-  const MetricCard = ({ title, value, type, icon: Icon }) => {
-    let borderColor = 'border-[#56CCF2]';
-    let iconStyles = 'bg-blue-50 text-blue-500';
-
-    if (type === 'total') {
-      borderColor = 'border-[#D62828]';
-      iconStyles = 'bg-red-50 text-red-500';
-    } else if (type === 'max') {
-      borderColor = 'border-amber-500';
-      iconStyles = 'bg-amber-50 text-amber-500';
-    }
-
-    return (
-      <div className={`bg-white rounded-2xl p-6 shadow-sm border-l-8 ${borderColor}`}>
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-sm font-medium text-gray-500 mb-2">{title}</h3>
-            <p className="text-3xl font-bold text-[#1B365D]">{value}</p>
-          </div>
-          <div className={`p-3 rounded-xl ${iconStyles}`}>
-            <Icon size={24} />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-[#EEF5FC] font-sans text-[#1B365D]">
-      {/* Cabeçalho */}
-      <header className="bg-gradient-to-r from-[#1B365D] to-[#2F80ED] text-white py-10 px-6 shadow-md">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Relatório Financeiro de Contas</h1>
-          <div className="flex items-center gap-2 text-blue-100 opacity-90 text-sm md:text-base">
-            <CalendarDays size={18} />
-            <span>Semana de 26.05.2026 a 01.06.2026</span>
-            <span className="mx-2">•</span>
-            <span>Dashboard Executivo</span>
-            <span className="mx-2">•</span>
-            <span>Diretoria Executiva</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="p-6 max-w-7xl mx-auto space-y-6 -mt-8">
-        {/* Cartões de Métricas */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard title="Total da Semana" value={formatCurrency(metrics.total)} type="total" icon={DollarSign} />
-          <MetricCard title="Quantidade de Pagamentos" value={metrics.count} type="normal" icon={FileText} />
-          <MetricCard title="Ticket Médio" value={formatCurrency(metrics.avgTicket)} type="normal" icon={TrendingUp} />
-          <MetricCard title="Maior Pagamento" value={formatCurrency(metrics.maxPayment)} type="max" icon={Award} />
-        </div>
-
-        {/* Gráfico de Barras Principal */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50">
-          <h2 className="text-lg font-semibold mb-6 text-[#1B365D]">Distribuição dos Pagamentos por Dia</h2>
-          <div className="h-80 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dailyData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EBF0F8" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 14}} dy={10} />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#6B7280', fontSize: 14}}
-                  tickFormatter={(val) => `R$ ${(val / 1000).toFixed(0)}k`} 
-                  dx={-10}
-                />
-                <Tooltip 
-                  formatter={(value) => [formatCurrency(value), "Valor"]}
-                  cursor={{fill: '#F3F4F6'}}
-                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.1)'}}
-                />
-                <Bar dataKey="value" fill="#56CCF2" radius={[6, 6, 0, 0]} barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Gráficos de Pizza */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50 flex flex-col">
-            <h2 className="text-lg font-semibold mb-2 text-[#1B365D]">Distribuição por Forma de Pagamento</h2>
-            <div className="h-72 w-full flex-grow">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={methodData} cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={2} dataKey="value">
-                    {methodData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '14px', color: '#6B7280' }}/>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50 flex flex-col">
-            <h2 className="text-lg font-semibold mb-2 text-[#1B365D]">Ranking dos Principais Solicitantes</h2>
-            <div className="h-72 w-full flex-grow">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={requesterData} cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={2} dataKey="value">
-                    {requesterData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '14px', color: '#6B7280' }}/>
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabela de Dados */}
-        <div className="bg-white rounded-2xl shadow-sm border border-blue-50 overflow-hidden flex flex-col">
-          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-lg font-semibold text-[#1B365D]">Tabela Detalhada das Contas Pagas</h2>
-            <div className="relative w-full sm:w-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="Buscar fornecedor, descrição, área..."
-                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white w-full sm:w-80 text-sm transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left whitespace-nowrap">
-              <thead className="bg-[#1B365D] text-white">
-                <tr>
-                  <th className="px-6 py-4 font-medium">Qtde</th>
-                  <th className="px-6 py-4 font-medium">Vencimento</th>
-                  <th className="px-6 py-4 font-medium">Solicitante</th>
-                  <th className="px-6 py-4 font-medium min-w-[200px]">Fornecedor</th>
-                  <th className="px-6 py-4 font-medium min-w-[300px]">Descrição</th>
-                  <th className="px-6 py-4 font-medium text-right">Valor</th>
-                  <th className="px-6 py-4 font-medium text-center">Programado</th>
-                  <th className="px-6 py-4 font-medium text-center">Forma</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredTable.length > 0 ? (
-                  filteredTable.map((row, i) => (
-                    <tr key={row.id} className={`${i % 2 === 0 ? 'bg-white' : 'bg-[#F7FBFF]'} hover:bg-blue-50 transition-colors`}>
-                      <td className="px-6 py-4 text-gray-500 text-center">{row.id}</td>
-                      <td className="px-6 py-4 font-medium">{formatDateBr(row.date)}</td>
-                      <td className="px-6 py-4"><span className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs font-semibold">{row.requester}</span></td>
-                      <td className="px-6 py-4 truncate max-w-xs" title={row.supplier}>{row.supplier}</td>
-                      <td className="px-6 py-4 truncate max-w-md text-gray-500" title={row.description}>{row.description}</td>
-                      <td className="px-6 py-4 text-right font-bold text-[#1B365D]">{formatCurrency(row.amount)}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="bg-green-100 text-green-700 py-1 px-3 rounded-full text-xs font-semibold">{row.paid}</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className={`py-1 px-3 rounded-full text-xs font-semibold shadow-sm ${methodColors[row.method] || 'bg-gray-100 text-gray-800'}`}>
-                          {row.method}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="8" className="px-6 py-10 text-center text-gray-500">
-                      Nenhum resultado encontrado para a busca "{searchTerm}"
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </main>
-
-      <footer className="py-8 text-center text-sm text-gray-500">
-        Relatório Financeiro Executivo Interativo • Atualizado Dinamicamente
-      </footer>
-    </div>
-  );
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #EEF5FC;
+    color: #1B365D;
 }
+
+.header {
+    background: linear-gradient(90deg, #1B365D, #2F80ED);
+    padding: 40px;
+    color: white;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+.header p {
+    margin-top: 10px;
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+.container {
+    padding: 25px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 22px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.card.total {
+    border-left: 8px solid #D62828;
+}
+
+.card.normal {
+    border-left: 8px solid #56CCF2;
+}
+
+.card.highest {
+    border-left: 8px solid #10B981; /* Cor verde para destaque */
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card p {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 14px;
+    color: #1B365D;
+}
+
+.chart {
+    background: white;
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.table-box {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+    overflow: auto;
+    max-height: 800px;
+}
+
+.table-box h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #1B365D;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th {
+    background: #F8FAFC;
+    color: #475569;
+    padding: 14px 12px;
+    position: sticky;
+    top: 0;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #E2E8F0;
+    z-index: 10;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+
+tr:nth-child(even) {
+    background: #F7FBFF;
+}
+
+/* Classes de alinhamento */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* Classes para os botões (Badges) */
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-block;
+    text-align: center;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+/* Cores por Solicitante */
+.badge-compras { background-color: #E0F2FE; color: #0369A1; }
+.badge-contratos { background-color: #F3E8FF; color: #7E22CE; }
+.badge-cga { background-color: #FEF3C7; color: #B45309; }
+.badge-fopag { background-color: #DCFCE7; color: #15803D; }
+
+/* Cores por Status Programado */
+.badge-sim { background-color: #DCFCE7; color: #15803D; }
+.badge-nao { background-color: #FEE2E2; color: #B91C1C; }
+
+/* Cores por Forma de Pagamento */
+.badge-pix { background-color: #CCFBF1; color: #0F766E; }
+.badge-boleto { background-color: #E0E7FF; color: #4338CA; }
+.badge-carteira { background-color: #FFEDD5; color: #C2410C; }
+
+.footer {
+    padding: 20px;
+    text-align: center;
+    color: #6B7280;
+    font-size: 14px;
+}
+
+@media(max-width: 1000px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Relatório Financeiro de Contas</h1>
+    <p>Semana de 26.05.2026 a 01.06.2026 | Dashboard Executivo • Diretoria Executiva</p>
+</div>
+
+<div class="container">
+    <div class="cards">
+        <div class="card total">
+            <h3>Total da Semana</h3>
+            <p>R$ 892.938,60</p>
+        </div>
+        <div class="card normal">
+            <h3>Quantidade de Pagamentos</h3>
+            <p>48</p>
+        </div>
+        <div class="card normal">
+            <h3>Ticket Médio</h3>
+            <p>R$ 18.602,89</p>
+        </div>
+        <div class="card highest">
+            <h3>Maior Pagamento</h3>
+            <p>R$ 398.639,22</p>
+        </div>
+    </div>
+
+    <div class="chart">
+        <script src="https://cdn.plot.ly/plotly-2.4.1.min.js"></script>
+        <div id="grafico-barras" style="height:350px; width:100%;"></div>
+        <script>
+            Plotly.newPlot("grafico-barras", 
+                [{x:["26/05/2026","27/05/2026","28/05/2026","29/05/2026","30/05/2026"], y:[5281.41, 50145.34, 94445.82, 206769.07, 536296.96], type:"bar", marker:{color:"#56CCF2"}}],
+                {title:"Distribuição dos Pagamentos por Dia", margin:{t:40, b:40, l:60, r:20}}, {responsive: true}
+            );
+        </script>
+    </div>
+
+    <div class="grid">
+        <div class="chart">
+            <div id="grafico-pizza-1" style="height:350px; width:100%;"></div>
+            <script>
+                Plotly.newPlot("grafico-pizza-1", 
+                    [{labels:["BOLETO","CARTEIRA DIGITAL","PIX"], values:[181929.63, 401380.02, 309628.95], type:"pie", textinfo:"percent+label", hole: 0.45}],
+                    {title:"Distribuição por Forma de Pagamento", margin:{t:40, b:20, l:20, r:20}, piecolorway:["#1B365D","#2F80ED","#56CCF2"]}, {responsive: true}
+                );
+            </script>
+        </div>
+
+        <div class="chart">
+            <div id="grafico-pizza-2" style="height:350px; width:100%;"></div>
+            <script>
+                Plotly.newPlot("grafico-pizza-2", 
+                    [{labels:["FOPAG","CONTRATOS","CGA","COMPRAS"], values:[408391.2, 332984.19, 136913.31, 14649.9], type:"pie", textinfo:"percent+label", hole: 0.45}],
+                    {title:"Ranking dos Principais Solicitantes", margin:{t:40, b:20, l:20, r:20}, piecolorway:["#D62828","#F77F00","#FCBF49","#EAE2B7"]}, {responsive: true}
+                );
+            </script>
+        </div>
+    </div>
+
+    <div class="table-box">
+        <h2>Tabela Detalhada das Contas Pagas</h2>
+        <table class="dataframe">
+            <thead>
+                <tr>
+                    <th class="text-center">Qtde</th>
+                    <th class="text-center">Vencimento</th>
+                    <th class="text-center">Solicitante</th>
+                    <th>Fornecedor</th>
+                    <th>Descrição</th>
+                    <th class="text-right">Valor</th>
+                    <th class="text-center">Programado</th>
+                    <th class="text-center">Forma de Pagto.</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-center">1</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>FORESTAMP FARDAMENTOS LTDA</td>
+                    <td>AQUISIÇÃO DE 80 CAMISAS PERSONALIZADAS - EVERESTE 10 ANOS - NF-e 175 / DP (174.2026)</td>
+                    <td class="text-right">R$ 1.920,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">2</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>FORESTAMP FARDAMENTOS LTDA</td>
+                    <td>AQUISIÇÃO DE PERSONALIZAÇÃO DA ARTE NA IMPRESSÃO DAS CAMISAS - EVERESTE 10 ANOS / NF-e 180 - DP (174.2026)</td>
+                    <td class="text-right">R$ 288,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">3</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>ABRAÃO RAMON REBOUÇAS RODRIC</td>
+                    <td>LOCAÇÃO DE EQUIPAMENTOS ARTISTA DACOTA - EVERESTE 10 ANOS / RECIBO - DP (174.2026)</td>
+                    <td class="text-right">R$ 500,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">4</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>ROSIVALDO SILVA DOS SANTOS</td>
+                    <td>SERVIÇO DE DESMONTA E MONTAGEM PAREDE DE VIDRO, LOCALIZADO NO AUDITÓRIO - EVERESTE 10 ANOS / NFS-e 39 - DP (174.2026)</td>
+                    <td class="text-right">R$ 300,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">5</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>ROSIVALDO SILVA DOS SANTOS</td>
+                    <td>SERVIÇO DE CODIFICAÇÃO DE 05(CINCO) CONTROLES P/PORTÃO GARAGEM / NFS-e 40 - DP (373.2025)</td>
+                    <td class="text-right">R$ 375,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">6</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>MARE DISTRIBUIDORA DE BEBIDAS</td>
+                    <td>AQUISIÇÃO DE ÁGUA / NF-e 1355396 - DP (183.2024)</td>
+                    <td class="text-right">R$ 433,80</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">7</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>CARTÓRIO RTD MANAUS</td>
+                    <td>ALTERAÇÃO DO ESTATUTO DO CONSELHO TÉCNICO CIENTÍFICO - DP (162.2025)</td>
+                    <td class="text-right">R$ 447,51</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">8</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>ECT EMP BRAS DE CORREIOS E TELEC</td>
+                    <td>SERVIÇO DE SEDEX - ENVIO DOS CONVITES PARA COLABORADORES FORA DA SEDE - XXXXXXX - EVERESTE 10 ANOS / DP (448.2024)</td>
+                    <td class="text-right">R$ 492,10</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">9</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>DAYSE DINELLY DE SOUSA</td>
+                    <td>AQUISIÇÃO DE 80 BISCOITOS PERSONALIZADOS - EVERESTE 10 ANOS / RECIBO - DP (174/2026)</td>
+                    <td class="text-right">R$ 280,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">10</td>
+                    <td class="text-center">26/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>DAYSE DINELLY DE SOUSA</td>
+                    <td>AQUISIÇÃO DE 70 BISCOITOS PERSONALIZADOS DESTINADOS AOS VISITANTES / RECIBO - DP (197.2024)</td>
+                    <td class="text-right">R$ 245,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+
+                <tr>
+                    <td class="text-center">11</td>
+                    <td class="text-center">27/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>GTEC SOLUCOES EM TECNOLOGIA LT</td>
+                    <td>SERVIÇO DE MONTAGEM E INFRAESTRUTURA DE REDE E SUBSTITUIÇÃO COM INSTALAÇÃO DE CAMERAS DE SEGURANÇA 03.2026 / NFS-e:57 - DP (343.2025)</td>
+                    <td class="text-right">R$ 16.040,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">12</td>
+                    <td class="text-center">27/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>GURUMATCH</td>
+                    <td>PLATAFORMA DE EDUCAÇÃO A DISTANCIA (EAD), IMPLANTAÇÃO EXPANSÃO EVERESTE ACADEMY / NFS-e XXXX - DP (461.2025)</td>
+                    <td class="text-right">R$ 947,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">13</td>
+                    <td class="text-center">27/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>MABELLY FESTAS E DECORAÇÕES</td>
+                    <td>SERVIÇO DE DECORAÇÃO BACKDROP COM BALÕES - EVERESTE 10 ANOS / NFS-e 21 - DP (174.2026)</td>
+                    <td class="text-right">R$ 1.050,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">14</td>
+                    <td class="text-center">27/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>BUFFET FINGER FOOD DICARLLO MA</td>
+                    <td>AQUISIÇÃO DE BUFFET P/ 70 PESSOAS- EVERESTE 10 ANOS(AGUARDANDO AUTORIZAÇÃO DO ORDENADOR DE DESPESAS)</td>
+                    <td class="text-right">R$ 2.500,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">15</td>
+                    <td class="text-center">27/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>CARLOS ALBERTO DE SALES SOCIEDA</td>
+                    <td>CONTRATO DE CONSULTORIA E ASSESSORIA JURIDICA DE 16.02.2026 a 16.03.2026 / NFS-e XX - DP (236.2025)</td>
+                    <td class="text-right">R$ 29.468,34</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">16</td>
+                    <td class="text-center">27/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>FRANCE ANDERSON DA SILVA SANT</td>
+                    <td>SERVIÇO DE ENTREGA DE CONVITES PARA CONSELHEIROS - EVERESTE 10 ANOS/ RECIBO - DP 174/2026</td>
+                    <td class="text-right">R$ 140,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+
+                <tr>
+                    <td class="text-center">17</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>ALELO</td>
+                    <td>BENEFÍCIOS ALELO 05.2026 / NFS-e XXXX - DP (38.2024)</td>
+                    <td class="text-right">R$ 45.135,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">18</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>ALELO</td>
+                    <td>BENEFÍCIOS ALELO 05.2026 / NFS-e XXXX - DP (38.2024)</td>
+                    <td class="text-right">R$ 2.507,50</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">19</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>ALELO</td>
+                    <td>BENEFÍCIOS ALELO 05.2026 / NFS-e XXXXX - DP (38.2024)</td>
+                    <td class="text-right">R$ 29.087,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">20</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>ALELO</td>
+                    <td>BENEFÍCIOS ALELO BOLSA 05.2026 / NFS-e XXXX - DP (38.2024)</td>
+                    <td class="text-right">R$ 1.654,95</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">21</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>AOVS SISTEMAS DE INFORMATICA S.A</td>
+                    <td>MATERIAL DIDÁTICO ONLINE DA ALURA APOSTILAS / NF-e 805.423 - DP (35.2025)</td>
+                    <td class="text-right">R$ 918,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">22</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>AOVS SISTEMAS DE INFORMATICA S.A</td>
+                    <td>ACESSO A PLATAFORMA ALURA - CURSO DE TECNOLOGIA E PROGRAMAÇÃO / NFS-e 954.291 - DP (35.2025)</td>
+                    <td class="text-right">R$ 102,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">23</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>GREAT PLACE TO WORK</td>
+                    <td>AQUISIÇÃO CERTIFICAÇÃO GPTW / NFS-e 140.693 - DP (54.2026)</td>
+                    <td class="text-right">R$ 1.648,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">24</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>BANDA RAHVOX</td>
+                    <td>SERVIÇO DE APRESENTAÇÃO MUSICAL BANDA RAHVOX - EVERESTE 10 ANOS / NFSe 9 - DP(174/2026)</td>
+                    <td class="text-right">R$ 2.100,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">25</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>Lima de Jesus Serviços e Comércio de</td>
+                    <td>ALUGUEL DE MESAS E CADEIRAS DESTINADOS AO EVENTO EVERESTE 10 ANOS/ NFSe 66-70000- DP(174/2026)</td>
+                    <td class="text-right">R$ 545,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">26</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-fopag">FOPAG</span></td>
+                    <td>NATHALIA INGRID BENTES LEONEL</td>
+                    <td>30 DIAS DE FÉRIAS - PERÍODO AQUISITIVO 12.06.2025 a 11.06.2026 - DP (XXX)</td>
+                    <td class="text-right">R$ 7.011,18</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">27</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>MARLLON GABREL RIBEIRO DA COST</td>
+                    <td>DV 0XX.2026 - 1 e 1/2 DIÁRIAS DE VIAGEM - MANAUX x BARREIRINHA x MAUÉS - XXXXX.2026 - DP (161.2026)</td>
+                    <td class="text-right">R$ 763,59</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">28</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>ANDRE FABIANO SANTOS PEREIRA</td>
+                    <td>DV 0XX.2026 - 1 e 1/2 DIÁRIAS DE VIAGEM - MANAUS x BARREIRINHA x MAUÉS - REPRESENTAÇÃO INSTITUCIONAL - DP (235.2023)</td>
+                    <td class="text-right">R$ 1.140,60</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">29</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>ROSIVALDO SILVA DOS SANTOS</td>
+                    <td>SERVIÇO DE DESMONTA E MONTAGEM PAREDE DE VIDRO, LOCALIZADO NO AUDITÓRIO - EVERESTE 10 ANOS / NFS-e XXX - DP (174.2026)</td>
+                    <td class="text-right">R$ 300,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">30</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>BUFFET FINGER FOOD DICARLLO MA</td>
+                    <td>AQUISIÇÃO DE BUFFET P/ 20 PESSOAS - EVERESTE 10 ANOS - NFe XXXX / DP (174/2026)</td>
+                    <td class="text-right">R$ 1.428,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">31</td>
+                    <td class="text-center">28/05/2026</td>
+                    <td class="text-center"><span class="badge badge-compras">COMPRAS</span></td>
+                    <td>LIMA JESUS SERVIÇOS E COMÉRCIO D</td>
+                    <td>ALUGUEL DE 15 CADEIRAS DESTINADAS AO EVENTO EVERESTE 10 ANOS/ NFS-e 74- DP(174/2026)</td>
+                    <td class="text-right">R$ 105,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+
+                <tr>
+                    <td class="text-center">32</td>
+                    <td class="text-center">29/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>P2P SOFTWARE CORPORATIVO</td>
+                    <td>21.12 a 20.01.2026 - MANUTENÇÃO DO SOTWARE PLATAFORMA HYPER CHANNEL / NFS-e 15 - DP (38.2025)</td>
+                    <td class="text-right">R$ 59.515,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">33</td>
+                    <td class="text-center">29/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>P2P SOFTWARE CORPORATIVO</td>
+                    <td>17.04 a 16.05.2026 - MANUTENÇÃO DO SOTWARE PLATAFORMA HYPER CHANNEL / NFS-e: 16 - DP (39.2025)</td>
+                    <td class="text-right">R$ 36.200,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">34</td>
+                    <td class="text-center">29/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>REGINALDO ESTEVES GOMES (BOM C</td>
+                    <td>CONSULTORIA EM SERVIÇOS DE INFORMÁTICA 05.2026 / NFS-e 39- DP (292.2024)</td>
+                    <td class="text-right">R$ 2.300,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">35</td>
+                    <td class="text-center">29/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>P2P SOFTWARE CORPORATIVO</td>
+                    <td>05.2026 - MANUTENÇÃO DE INFRA ESTRUTURA EM NUVEM E COMUNICAÇÃO / NFS-e: 17 - DP (XX)</td>
+                    <td class="text-right">R$ 17.118,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">36</td>
+                    <td class="text-center">29/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>CARLOS ALBERTO DE SALES SOCIEDA</td>
+                    <td>CONTRATO DE CONSULTORIA E ASSESSORIA JURIDICA DE 16.01.2026 a 16.02.2026/ NFS-e XX - DP (236.2025)</td>
+                    <td class="text-right">R$ 91.468,34</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">37</td>
+                    <td class="text-center">29/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>PREFEITURA DE SÃO JOSÉ DOS CAMP</td>
+                    <td>TAXA DE LICENÇA DE FISCALIZAÇÃO DE FUNCIONAMENTO (PSJC) - FILIAL PIT - SP - DP (228.2026)</td>
+                    <td class="text-right">R$ 167,73</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+
+                <tr>
+                    <td class="text-center">38</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>RECEITA FEDERAL</td>
+                    <td>PARCELAMENTO PGFN INSS 28/60</td>
+                    <td class="text-right">R$ 39.378,44</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">39</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>KF SOLUCOES EM GESTAO LTDA</td>
+                    <td>ALUGUEL PRÉDIO - 06.2026 - DP (26.2024)</td>
+                    <td class="text-right">R$ 88.000,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">40</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>LUCIANA DA SILVA PINHEIRO</td>
+                    <td>HONORÁRIOS CONTÁBEIS 05.2026 / NFS-e: 25 - DP (40.2025)</td>
+                    <td class="text-right">R$ 4.300,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">41</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>LUCIANA DA SILVA PINHEIRO</td>
+                    <td>LICENÇA DE USO DE MÓDULO DE FOLHA DE PAGAMENTO - 19.04 a 09.05.2026 - FATURA/RECIBO Nº 05.2026</td>
+                    <td class="text-right">R$ 220,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">42</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-contratos">CONTRATOS</span></td>
+                    <td>CHAVES SERVICOS</td>
+                    <td>REPRESENTAÇÃO COMERCIAL - 05/2026 / NFS-e XX - DP (87.2025)</td>
+                    <td class="text-right">R$ 3.000,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-pix">PIX</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">43</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-cga">CGA</span></td>
+                    <td>BANCO SANTANDER</td>
+                    <td>ANUIDADE DO CARTÃO DE CREDITO - SANTANDER</td>
+                    <td class="text-right">R$ 18,50</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-boleto">BOLETO</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">44</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-fopag">FOPAG</span></td>
+                    <td>ENZO PASSOS CRUZ</td>
+                    <td>BOLSA ESTÁGIO IEL - 05.2026 - DP (425.2025)</td>
+                    <td class="text-right">R$ 1.080,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-carteira">CARTEIRA DIGITAL</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">45</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-fopag">FOPAG</span></td>
+                    <td>ENZO PASSOS CRUZ</td>
+                    <td>BENEFÍCIO DE V.T. - (PERÍODO DE 01 a 30.04.2026) ESTÁGIO - DP (424.2025)</td>
+                    <td class="text-right">R$ 290,40</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-carteira">CARTEIRA DIGITAL</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">46</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-fopag">FOPAG</span></td>
+                    <td>THOMAZ MARCOS MAIA DOS SANTOS</td>
+                    <td>BOLSA ESTÁGIO IEL - 05.2026 - DP (425.2025)</td>
+                    <td class="text-right">R$ 1.080,00</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-carteira">CARTEIRA DIGITAL</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">47</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-fopag">FOPAG</span></td>
+                    <td>THOMAZ MARCOS MAIA DOS SANTOS</td>
+                    <td>BENEFÍCIO DE V.T. - (PERÍODO DE 01 a 30.04.2026) ESTÁGIO - DP (424.2025)</td>
+                    <td class="text-right">R$ 290,40</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-carteira">CARTEIRA DIGITAL</span></td>
+                </tr>
+                <tr>
+                    <td class="text-center">48</td>
+                    <td class="text-center">30/05/2026</td>
+                    <td class="text-center"><span class="badge badge-fopag">FOPAG</span></td>
+                    <td>SALÁRIO</td>
+                    <td>MAIO.2026</td>
+                    <td class="text-right">R$ 398.639,22</td>
+                    <td class="text-center"><span class="badge badge-sim">SIM</span></td>
+                    <td class="text-center"><span class="badge badge-carteira">CARTEIRA DIGITAL</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="footer">
+    <p>Dashboard Executivo © 2026 Diretoria Executiva</p>
+</div>
+
+</body>
+</html>
