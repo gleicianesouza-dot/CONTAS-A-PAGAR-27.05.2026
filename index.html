@@ -1,0 +1,308 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  PieChart, Pie, Cell, Legend 
+} from 'recharts';
+import { DollarSign, FileText, TrendingUp, Award, Search, CalendarDays } from 'lucide-react';
+
+// Dados brutos atualizados (Semana de 26.05.2026 a 01.06.2026)
+const rawData = [
+  { id: 1, date: "2026-05-26", requester: "COMPRAS", supplier: "FORESTAMP FARDAMENTOS LTDA", description: "AQUISIÇÃO DE 80 CAMISAS PERSONALIZADAS - EVERESTE 10 ANOS - NF-e 175 / DP (174.2026)", amount: 1920.00, paid: "SIM", method: "PIX" },
+  { id: 2, date: "2026-05-26", requester: "COMPRAS", supplier: "FORESTAMP FARDAMENTOS LTDA", description: "AQUISIÇÃO DE PERSONALIZAÇÃO DA ARTE NA IMPRESSÃO DAS CAMISAS - EVERESTE 10 ANOS / NF-e 180 - DP (174.2026)", amount: 288.00, paid: "SIM", method: "PIX" },
+  { id: 3, date: "2026-05-26", requester: "COMPRAS", supplier: "ABRAÃO RAMON REBOUÇAS RODRIGUES", description: "LOCAÇÃO DE EQUIPAMENTOS ARTISTA DACOTA - EVERESTE 10 ANOS / RECIBO - DP (174.2026)", amount: 500.00, paid: "SIM", method: "PIX" },
+  { id: 4, date: "2026-05-26", requester: "COMPRAS", supplier: "ROSIVALDO SILVA DOS SANTOS", description: "SERVIÇO DE DESMONTA E MONTAGEM PAREDE DE VIDRO, LOCALIZADO NO AUDITÓRIO - EVERESTE 10 ANOS  / NFS-e 39 - DP (174.2026)", amount: 300.00, paid: "SIM", method: "PIX" },
+  { id: 5, date: "2026-05-26", requester: "COMPRAS", supplier: "ROSIVALDO SILVA DOS SANTOS", description: "SERVIÇO DE CODIFICAÇÃO DE 05(CINCO) CONTROLES P/PORTÃO GARAGEM / NFS-e 40 - DP (373.2025)", amount: 375.00, paid: "SIM", method: "PIX" },
+  { id: 6, date: "2026-05-26", requester: "COMPRAS", supplier: "MARE DISTRIBUIDORA DE BEBIDAS", description: "AQUISIÇÃO DE ÁGUA / NF-e 1355396 - DP (183.2024)", amount: 433.80, paid: "SIM", method: "PIX" },
+  { id: 7, date: "2026-05-26", requester: "CONTRATOS", supplier: "CARTÓRIO RTD MANAUS", description: "ALTERAÇÃO DO ESTATUTO DO CONSELHO TÉCNICO CIENTÍFICO - DP (162.2025)", amount: 447.51, paid: "SIM", method: "BOLETO" },
+  { id: 8, date: "2026-05-26", requester: "COMPRAS", supplier: "ECT EMP BRAS DE CORREIOS E TELEGRAFOS", description: "SERVIÇO DE SEDEX - ENVIO DOS CONVITES PARA COLABORADORES FORA DA SEDE  - XXXXXX - EVERESTE 10 ANOS / DP (448.2024)", amount: 492.10, paid: "SIM", method: "PIX" },
+  { id: 9, date: "2026-05-26", requester: "COMPRAS", supplier: "DAYSE DINELLY DE SOUSA", description: "AQUISIÇÃO DE 80 BISCOITOS PERSONALIZADOS - EVERESTE 10 ANOS / RECIBO - DP (174/2026)", amount: 280.00, paid: "SIM", method: "PIX" },
+  { id: 10, date: "2026-05-26", requester: "COMPRAS", supplier: "DAYSE DINELLY DE SOUSA", description: "AQUISIÇÃO DE 70 BISCOITOS PERSONALIZADOS DESTINADOS AOS VISITANTES / RECIBO - DP (197.2024)", amount: 245.00, paid: "SIM", method: "PIX" },
+  { id: 11, date: "2026-05-27", requester: "CGA", supplier: "GTEC SOLUCOES EM TECNOLOGIA LTDA", description: "SERVIÇO DE MONTAGEM E INFRAESTRUTURA DE REDE E SUBSTITUIÇÃO COM INSTALAÇÃO DE CAMERAS DE SEGURANÇA 03.2026 / NFS-e:57 - DP (343.2025)", amount: 16040.00, paid: "SIM", method: "PIX" },
+  { id: 12, date: "2026-05-27", requester: "CONTRATOS", supplier: "GURUMATCH", description: "PLATAFORMA DE EDUCAÇÃO A DISTANCIA (EAD), IMPLANTAÇÃO EXPANSÃO EVERESTE ACADEMY / NFS-e XXXX - DP (461.2025)", amount: 947.00, paid: "SIM", method: "BOLETO" },
+  { id: 13, date: "2026-05-27", requester: "COMPRAS", supplier: "MABELLY FESTAS E DECORAÇÕES", description: "SERVIÇO DE DECORAÇÃO BACKDROP COM BALÕES - EVERESTE 10 ANOS  / NFS-e 21 - DP (174.2026)", amount: 1050.00, paid: "SIM", method: "PIX" },
+  { id: 14, date: "2026-05-27", requester: "COMPRAS", supplier: "BUFFET FINGER FOOD DICARLLO MANAUS", description: "AQUISIÇÃO DE BUFFET P/ 70 PESSOAS- EVERESTE 10 ANOS(AGUARDANDO AUTORIZAÇÃO DO ORDENADOR DE DESPESAS)", amount: 2500.00, paid: "SIM", method: "PIX" },
+  { id: 15, date: "2026-05-27", requester: "CONTRATOS", supplier: "CARLOS ALBERTO DE SALES SOCIEDADE INDIVIDUAL DE ADVOCACIA", description: "CONTRATO DE CONSULTORIA E ASSESSORIA JURIDICA DE 16.02.2026 a 16.03.2026 / NFS-e XX - DP (236.2025)", amount: 29468.34, paid: "SIM", method: "PIX" },
+  { id: 16, date: "2026-05-27", requester: "COMPRAS", supplier: "FRANCE ANDERSON DA SILVA SANTOS", description: "SERVIÇO DE ENTREGA DE CONVITES PARA CONSELHEIROS - EVERESTE 10 ANOS/ RECIBO - DP 174/2026", amount: 140.00, paid: "SIM", method: "PIX" },
+  { id: 17, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO 05.2026 / NFS-e XXXX - DP (38.2024)", amount: 45135.00, paid: "SIM", method: "BOLETO" },
+  { id: 18, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO 05.2026 / NFS-e XXXX - DP (38.2024)", amount: 2507.50, paid: "SIM", method: "BOLETO" },
+  { id: 19, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO 05.2026 / NFS-e XXXXX - DP (38.2024)", amount: 29087.00, paid: "SIM", method: "BOLETO" },
+  { id: 20, date: "2026-05-28", requester: "CGA", supplier: "ALELO", description: "BENEFÍCIOS ALELO BOLSA 05.2026 / NFS-e XXXX - DP (38.2024)", amount: 1654.95, paid: "SIM", method: "BOLETO" },
+  { id: 21, date: "2026-05-28", requester: "CGA", supplier: "AOVS SISTEMAS DE INFORMATICA S.A.", description: "MATERIAL DIDÁTICO ONLINE DA ALURA APOSTILAS / NF-e 805.423 - DP (35.2025)", amount: 918.00, paid: "SIM", method: "BOLETO" },
+  { id: 22, date: "2026-05-28", requester: "CGA", supplier: "AOVS SISTEMAS DE INFORMATICA S.A.", description: "ACESSO A PLATAFORMA ALURA - CURSO DE TECNOLOGIA E PROGRAMAÇÃO / NFS-e 954.291 - DP (35.2025)", amount: 102.00, paid: "SIM", method: "BOLETO" },
+  { id: 23, date: "2026-05-28", requester: "COMPRAS", supplier: "GREAT PLACE TO WORK", description: "AQUISIÇÃO CERTIFICAÇÃO GPTW / NFS-e 140.693 - DP (54.2026)", amount: 1648.00, paid: "SIM", method: "BOLETO" },
+  { id: 24, date: "2026-05-28", requester: "COMPRAS", supplier: "BANDA RAHVOX", description: "SERVIÇO DE APRESENTAÇÃO MUSICAL BANDA RAHVOX - EVERESTE 10 ANOS / NFSe 9 - DP(174/2026)", amount: 2100.00, paid: "SIM", method: "PIX" },
+  { id: 25, date: "2026-05-28", requester: "COMPRAS", supplier: "Lima de Jesus Serviços e Comércio de Alimentos Ltda.", description: "ALUGUEL DE MESAS E CADEIRAS DESTINADOS AO EVENTO EVERESTE 10 ANOS/ NFSe 66-70000- DP(174/2026)", amount: 545.00, paid: "SIM", method: "PIX" },
+  { id: 26, date: "2026-05-28", requester: "FOPAG", supplier: "NATHALIA INGRID BENTES LEONEL", description: "30 DIAS DE FÉRIAS - PERÍODO AQUISITIVO 12.06.2025 a 11.06.2026 - DP (XXX)", amount: 7011.18, paid: "SIM", method: "PIX" },
+  { id: 27, date: "2026-05-28", requester: "CGA", supplier: "MARLLON GABREL RIBEIRO DA COSTA", description: "DV 0XX.2026 - 1 e 1/2 DIÁRIAS DE VIAGEM - MANAUS x BARREIRINHA x MAUÉS - XXXXX.2026 - DP (161.2026)", amount: 763.59, paid: "SIM", method: "PIX" },
+  { id: 28, date: "2026-05-28", requester: "CGA", supplier: "ANDRE FABIANO SANTOS PEREIRA", description: "DV 0XX.2026 - 1 e 1/2 DIÁRIAS DE VIAGEM - MANAUS x BARREIRINHA x MAUÉS - REPRESENTAÇÃO INSTITUCIONAL  - DP (235.2023)", amount: 1140.60, paid: "SIM", method: "PIX" },
+  { id: 29, date: "2026-05-28", requester: "COMPRAS", supplier: "ROSIVALDO SILVA DOS SANTOS", description: "SERVIÇO DE DESMONTA E MONTAGEM PAREDE DE VIDRO, LOCALIZADO NO AUDITÓRIO - EVERESTE 10 ANOS / NFS-e XXX - DP (174.2026)", amount: 300.00, paid: "SIM", method: "PIX" },
+  { id: 30, date: "2026-05-28", requester: "COMPRAS", supplier: "BUFFET FINGER FOOD DICARLLO MANAUS", description: "AQUISIÇÃO DE BUFFET P/ 20 PESSOAS - EVERESTE 10 ANOS - NFe XXXX / DP (174/2026)", amount: 1428.00, paid: "SIM", method: "PIX" },
+  { id: 31, date: "2026-05-28", requester: "COMPRAS", supplier: "LIMA JESUS SERVIÇOS E COMÉRCIO DE ALIMENTOS LTDA", description: "ALUGUEL DE 15 CADEIRAS DESTINADAS AO EVENTO EVERESTE 10 ANOS/ NFS-e 74- DP(174/2026)", amount: 105.00, paid: "SIM", method: "PIX" },
+  { id: 32, date: "2026-05-29", requester: "CONTRATOS", supplier: "P2P SOFTWARE CORPORATIVO", description: "21.12 a 20.01.2026 - MANUTENÇÃO DO SOTWARE PLATAFORMA HYPER CHANNEL / NFS-e 15 - DP (38.2025)", amount: 59515.00, paid: "SIM", method: "PIX" },
+  { id: 33, date: "2026-05-29", requester: "CONTRATOS", supplier: "P2P SOFTWARE CORPORATIVO", description: "17.04 a 16.05.2026 - MANUTENÇÃO DO SOTWARE PLATAFORMA HYPER CHANNEL / NFS-e: 16 - DP (39.2025)", amount: 36200.00, paid: "SIM", method: "BOLETO" },
+  { id: 34, date: "2026-05-29", requester: "CONTRATOS", supplier: "REGINALDO ESTEVES GOMES (BOM COMUNICAR)", description: "CONSULTORIA EM SERVIÇOS DE INFORMÁTICA 05.2026 / NFS-e 39- DP (292.2024)", amount: 2300.00, paid: "SIM", method: "BOLETO" },
+  { id: 35, date: "2026-05-29", requester: "CONTRATOS", supplier: "P2P SOFTWARE CORPORATIVO", description: "05.2026 - MANUTENÇÃO DE INFRA ESTRUTURA EM NUVEM E COMUNICAÇÃO / NFS-e: 17 - DP (XX)", amount: 17118.00, paid: "SIM", method: "BOLETO" },
+  { id: 36, date: "2026-05-29", requester: "CONTRATOS", supplier: "CARLOS ALBERTO DE SALES SOCIEDADE INDIVIDUAL DE ADVOCACIA", description: "CONTRATO DE CONSULTORIA E ASSESSORIA JURIDICA DE 16.01.2026 a 16.02.2026/ NFS-e XX - DP (236.2025)", amount: 91468.34, paid: "SIM", method: "PIX" },
+  { id: 37, date: "2026-05-29", requester: "CGA", supplier: "PREFEITURA DE SÃO JOSÉ DOS CAMPOS", description: "TAXA DE LICENÇA DE FISCALIZAÇÃO DE FUNCIONAMENTO (PSJC) - FILIAL PIT - SP -  DP (228.2026)", amount: 167.73, paid: "SIM", method: "BOLETO" },
+  { id: 38, date: "2026-05-30", requester: "CGA", supplier: "RECEITA FEDERAL", description: "PARCELAMENTO PGFN INSS 28/60", amount: 39378.44, paid: "SIM", method: "BOLETO" },
+  { id: 39, date: "2026-05-30", requester: "CONTRATOS", supplier: "KF SOLUCOES EM GESTAO LTDA", description: "ALUGUEL PRÉDIO - 06.2026 - DP (26.2024)", amount: 88000.00, paid: "SIM", method: "PIX" },
+  { id: 40, date: "2026-05-30", requester: "CONTRATOS", supplier: "LUCIANA DA SILVA PINHEIRO", description: "HONORÁRIOS CONTÁBEIS 05.2026 / NFS-e: 25 - DP (40.2025)", amount: 4300.00, paid: "SIM", method: "BOLETO" },
+  { id: 41, date: "2026-05-30", requester: "CONTRATOS", supplier: "LUCIANA DA SILVA PINHEIRO", description: "LICENÇA DE USO DE MÓDULO DE FOLHA DE PAGAMENTO - 19.04 a 09.05.2026 - FATURA/RECIBO N° 05.2026", amount: 220.00, paid: "SIM", method: "PIX" },
+  { id: 42, date: "2026-05-30", requester: "CONTRATOS", supplier: "CHAVES SERVICOS", description: "REPRESENTAÇÃO COMERCIAL - 05/2026 / NFS-e XX - DP (87.2025)", amount: 3000.00, paid: "SIM", method: "PIX" },
+  { id: 43, date: "2026-05-30", requester: "CGA", supplier: "BANCO SANTANDER", description: "ANUIDADE DO CARTÃO DE CREDITO - SANTANDER", amount: 18.50, paid: "SIM", method: "BOLETO" },
+  { id: 44, date: "2026-05-30", requester: "FOPAG", supplier: "ENZO PASSOS CRUZ", description: "BOLSA ESTÁGIO IEL - 05.2026 - DP (425.2025)", amount: 1080.00, paid: "SIM", method: "CARTEIRA DIGITAL" },
+  { id: 45, date: "2026-05-30", requester: "FOPAG", supplier: "ENZO PASSOS CRUZ", description: "BENEFÍCIO DE V.T. - (PERÍODO DE 01 a 30.04.2026) ESTÁGIO - DP (424.2025)", amount: 290.40, paid: "SIM", method: "CARTEIRA DIGITAL" },
+  { id: 46, date: "2026-05-30", requester: "FOPAG", supplier: "THOMAZ MARCOS MAIA DOS SANTOS", description: "BOLSA ESTÁGIO IEL - 05.2026 - DP (425.2025)", amount: 1080.00, paid: "SIM", method: "CARTEIRA DIGITAL" },
+  { id: 47, date: "2026-05-30", requester: "FOPAG", supplier: "THOMAZ MARCOS MAIA DOS SANTOS", description: "BENEFÍCIO DE V.T. - (PERÍODO DE 01 a 30.04.2026) ESTÁGIO - DP (424.2025)", amount: 290.40, paid: "SIM", method: "CARTEIRA DIGITAL" },
+  { id: 48, date: "2026-05-30", requester: "FOPAG", supplier: "SALÁRIO", description: "MAIO.2026", amount: 398639.22, paid: "SIM", method: "CARTEIRA DIGITAL" }
+];
+
+const COLORS = ["#2F80ED", "#56CCF2", "#1B365D", "#4DA3FF", "#A9D0FF"];
+
+// Funções Utilitárias de Formatação
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+};
+
+const formatDateBr = (dateStr) => {
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+};
+
+// Mapeamento de cores para as tags de forma de pagamento
+const methodColors = {
+  "PIX": "bg-purple-100 text-purple-800",
+  "BOLETO": "bg-orange-100 text-orange-800",
+  "DARF": "bg-rose-100 text-rose-800",
+  "GFD": "bg-teal-100 text-teal-800",
+  "CARTEIRA DIGITAL": "bg-indigo-100 text-indigo-800"
+};
+
+export default function App() {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Processamento de Dados (Memoizado para performance)
+  const { metrics, dailyData, methodData, requesterData } = useMemo(() => {
+    let totalAmount = 0;
+    const dailyMap = {};
+    const methodMap = {};
+    const requesterMap = {};
+
+    rawData.forEach(d => {
+      // Totais
+      totalAmount += d.amount;
+      
+      // Agrupamento Diário
+      dailyMap[d.date] = (dailyMap[d.date] || 0) + d.amount;
+      
+      // Agrupamento por Método
+      methodMap[d.method] = (methodMap[d.method] || 0) + d.amount;
+      
+      // Agrupamento por Solicitante
+      requesterMap[d.requester] = (requesterMap[d.requester] || 0) + d.amount;
+    });
+
+    return {
+      metrics: {
+        total: totalAmount,
+        count: rawData.length,
+        avgTicket: totalAmount / rawData.length,
+        maxPayment: Math.max(...rawData.map(d => d.amount))
+      },
+      dailyData: Object.keys(dailyMap).sort().map(k => ({ name: formatDateBr(k), value: dailyMap[k] })),
+      methodData: Object.keys(methodMap).map(k => ({ name: k, value: methodMap[k] })).sort((a,b) => b.value - a.value),
+      requesterData: Object.keys(requesterMap).map(k => ({ name: k, value: requesterMap[k] })).sort((a,b) => b.value - a.value),
+    };
+  }, []);
+
+  // Filtro da Tabela
+  const filteredTable = useMemo(() => {
+    return rawData.filter(item => 
+      item.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.requester.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.method.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [searchTerm]);
+
+  const MetricCard = ({ title, value, type, icon: Icon }) => {
+    let borderColor = 'border-[#56CCF2]';
+    let iconStyles = 'bg-blue-50 text-blue-500';
+
+    if (type === 'total') {
+      borderColor = 'border-[#D62828]';
+      iconStyles = 'bg-red-50 text-red-500';
+    } else if (type === 'max') {
+      borderColor = 'border-amber-500';
+      iconStyles = 'bg-amber-50 text-amber-500';
+    }
+
+    return (
+      <div className={`bg-white rounded-2xl p-6 shadow-sm border-l-8 ${borderColor}`}>
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-sm font-medium text-gray-500 mb-2">{title}</h3>
+            <p className="text-3xl font-bold text-[#1B365D]">{value}</p>
+          </div>
+          <div className={`p-3 rounded-xl ${iconStyles}`}>
+            <Icon size={24} />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-[#EEF5FC] font-sans text-[#1B365D]">
+      {/* Cabeçalho */}
+      <header className="bg-gradient-to-r from-[#1B365D] to-[#2F80ED] text-white py-10 px-6 shadow-md">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Relatório Financeiro de Contas</h1>
+          <div className="flex items-center gap-2 text-blue-100 opacity-90 text-sm md:text-base">
+            <CalendarDays size={18} />
+            <span>Semana de 26.05.2026 a 01.06.2026</span>
+            <span className="mx-2">•</span>
+            <span>Dashboard Executivo</span>
+            <span className="mx-2">•</span>
+            <span>Diretoria Executiva</span>
+          </div>
+        </div>
+      </header>
+
+      <main className="p-6 max-w-7xl mx-auto space-y-6 -mt-8">
+        {/* Cartões de Métricas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard title="Total da Semana" value={formatCurrency(metrics.total)} type="total" icon={DollarSign} />
+          <MetricCard title="Quantidade de Pagamentos" value={metrics.count} type="normal" icon={FileText} />
+          <MetricCard title="Ticket Médio" value={formatCurrency(metrics.avgTicket)} type="normal" icon={TrendingUp} />
+          <MetricCard title="Maior Pagamento" value={formatCurrency(metrics.maxPayment)} type="max" icon={Award} />
+        </div>
+
+        {/* Gráfico de Barras Principal */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50">
+          <h2 className="text-lg font-semibold mb-6 text-[#1B365D]">Distribuição dos Pagamentos por Dia</h2>
+          <div className="h-80 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dailyData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EBF0F8" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#6B7280', fontSize: 14}} dy={10} />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{fill: '#6B7280', fontSize: 14}}
+                  tickFormatter={(val) => `R$ ${(val / 1000).toFixed(0)}k`} 
+                  dx={-10}
+                />
+                <Tooltip 
+                  formatter={(value) => [formatCurrency(value), "Valor"]}
+                  cursor={{fill: '#F3F4F6'}}
+                  contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 4px 15px rgba(0,0,0,0.1)'}}
+                />
+                <Bar dataKey="value" fill="#56CCF2" radius={[6, 6, 0, 0]} barSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Gráficos de Pizza */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50 flex flex-col">
+            <h2 className="text-lg font-semibold mb-2 text-[#1B365D]">Distribuição por Forma de Pagamento</h2>
+            <div className="h-72 w-full flex-grow">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={methodData} cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={2} dataKey="value">
+                    {methodData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '14px', color: '#6B7280' }}/>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50 flex flex-col">
+            <h2 className="text-lg font-semibold mb-2 text-[#1B365D]">Ranking dos Principais Solicitantes</h2>
+            <div className="h-72 w-full flex-grow">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={requesterData} cx="50%" cy="50%" innerRadius={70} outerRadius={110} paddingAngle={2} dataKey="value">
+                    {requesterData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '14px', color: '#6B7280' }}/>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabela de Dados */}
+        <div className="bg-white rounded-2xl shadow-sm border border-blue-50 overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-lg font-semibold text-[#1B365D]">Tabela Detalhada das Contas Pagas</h2>
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                placeholder="Buscar fornecedor, descrição, área..."
+                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white w-full sm:w-80 text-sm transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="bg-[#1B365D] text-white">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Qtde</th>
+                  <th className="px-6 py-4 font-medium">Vencimento</th>
+                  <th className="px-6 py-4 font-medium">Solicitante</th>
+                  <th className="px-6 py-4 font-medium min-w-[200px]">Fornecedor</th>
+                  <th className="px-6 py-4 font-medium min-w-[300px]">Descrição</th>
+                  <th className="px-6 py-4 font-medium text-right">Valor</th>
+                  <th className="px-6 py-4 font-medium text-center">Programado</th>
+                  <th className="px-6 py-4 font-medium text-center">Forma</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredTable.length > 0 ? (
+                  filteredTable.map((row, i) => (
+                    <tr key={row.id} className={`${i % 2 === 0 ? 'bg-white' : 'bg-[#F7FBFF]'} hover:bg-blue-50 transition-colors`}>
+                      <td className="px-6 py-4 text-gray-500 text-center">{row.id}</td>
+                      <td className="px-6 py-4 font-medium">{formatDateBr(row.date)}</td>
+                      <td className="px-6 py-4"><span className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs font-semibold">{row.requester}</span></td>
+                      <td className="px-6 py-4 truncate max-w-xs" title={row.supplier}>{row.supplier}</td>
+                      <td className="px-6 py-4 truncate max-w-md text-gray-500" title={row.description}>{row.description}</td>
+                      <td className="px-6 py-4 text-right font-bold text-[#1B365D]">{formatCurrency(row.amount)}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="bg-green-100 text-green-700 py-1 px-3 rounded-full text-xs font-semibold">{row.paid}</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className={`py-1 px-3 rounded-full text-xs font-semibold shadow-sm ${methodColors[row.method] || 'bg-gray-100 text-gray-800'}`}>
+                          {row.method}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="8" className="px-6 py-10 text-center text-gray-500">
+                      Nenhum resultado encontrado para a busca "{searchTerm}"
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <footer className="py-8 text-center text-sm text-gray-500">
+        Relatório Financeiro Executivo Interativo • Atualizado Dinamicamente
+      </footer>
+    </div>
+  );
+}
